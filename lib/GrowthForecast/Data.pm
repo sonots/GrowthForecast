@@ -57,6 +57,8 @@ CREATE TABLE IF NOT EXISTS graphs (
     created_at   UNSIGNED INT NOT NULL,
     updated_at   UNSIGNED INT NOT NULL,
     timestamp    UNSIGNED INT DEFAULT NULL,
+    rrdupdated_at UNSIGNED INT DEFAULT NULL,
+    short_rrdupdated_at UNSIGNED INT DEFAULT NULL,
     UNIQUE  (service_name, section_name, graph_name)
 )
 EOF
@@ -145,6 +147,14 @@ EOF
             if ( ! exists $graphs_columns{timestamp} ) {
                 infof("add new column 'timestamp'");
                 $dbh->do(q{ALTER TABLE graphs ADD timestamp UNSIGNED INT DEFAULT NULL});
+            }
+            if ( ! exists $graphs_columns{rrdupdated_at} ) {
+                infof("add new column 'rrdupdated_at'");
+                $dbh->do(q{ALTER TABLE graphs ADD rrdupdated_at UNSIGNED INT DEFAULT NULL});
+            }
+            if ( ! exists $graphs_columns{short_rrdupdated_at} ) {
+                infof("add new column 'short_rrdupdated_at'");
+                $dbh->do(q{ALTER TABLE graphs ADD short_rrdupdated_at UNSIGNED INT DEFAULT NULL});
             }
             $dbh->commit;
         }
@@ -298,7 +308,7 @@ sub get_by_id_for_rrdupdate {
 }
 
 sub update {
-    my ($self, $service, $section, $graph, $number, $mode, $color, $timestamp ) = @_;
+    my ($self, $service, $section, $graph, $number, $mode, $color, $timestamp, $rrdupdated_at, $short_rrdupdated_at) = @_;
     my $dbh = $self->dbh;
     $dbh->begin_work;
 
@@ -315,8 +325,8 @@ sub update {
         if ( $mode ne 'modified' || ($mode eq 'modified' && $data->{number} != $number) ) {
             $color ||= $data->{color};
             $dbh->query(
-                'UPDATE graphs SET number=?, mode=?, color=?, updated_at=?, timestamp=? WHERE id = ?',
-                $number, $mode, $color, time, $timestamp, $data->{id}
+                'UPDATE graphs SET number=?, mode=?, color=?, updated_at=?, timestamp=?, rrdupdated_at=?, short_rrdupdated_at=? WHERE id = ?',
+                $number, $mode, $color, time, $timestamp, $rrdupdated_at, $short_rrdupdated_at, $data->{id}
             );
         }
     }
@@ -324,9 +334,9 @@ sub update {
         my @colors = List::Util::shuffle(qw/33 66 99 cc/);
         $color ||= '#' . join('', splice(@colors,0,3));
         $dbh->query(
-            'INSERT INTO graphs (service_name, section_name, graph_name, number, mode, color, llimit, sllimit, created_at, updated_at, timestamp)
-                         VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-            $service, $section, $graph, $number, $mode, $color, -1000000000, -100000 , time, time, $timestamp
+            'INSERT INTO graphs (service_name, section_name, graph_name, number, mode, color, llimit, sllimit, created_at, updated_at, timestamp, $rrdupdated_at, $short_rrdupdated_at)
+                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            $service, $section, $graph, $number, $mode, $color, -1000000000, -100000 , time, time, $timestamp, $rrdupdated_at, $short_rrdupdated_at
         );
     }
 
@@ -361,6 +371,28 @@ sub update_graph_description {
         $description, $id
     );
     return 1;    
+}
+
+sub update_graph_rrdupdated_at {
+    my ($self, $id, $rrdupdated_at) = @_;
+    $rrdupdated_at ||= time;
+    my $dbh = $self->dbh;
+    $dbh->query(
+        'UPDATE graphs SET rrdupdated_at=? WHERE id = ?',
+        $rrdupdated_at, $id
+    );
+    return 1;
+}
+
+sub update_graph_short_rrdupdated_at {
+    my ($self, $id, $short_rrdupdated_at) = @_;
+    $short_rrdupdated_at ||= time;
+    my $dbh = $self->dbh;
+    $dbh->query(
+        'UPDATE graphs SET short_rrdupdated_at=? WHERE id = ?',
+        $short_rrdupdated_at, $id
+    );
+    return 1;
 }
 
 sub get_services {

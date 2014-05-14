@@ -98,10 +98,14 @@ sub run {
                 for my $data ( @$all_rows ) {
                     debugf( "[%s] update %s", $method, $data->{id});
                     if ( $method eq 'update' ) {
+                        next if defined($data->{rrdupdated_at}); # guard not to rrdupdate twice for the same timestamp
                         $self->rrd->update($data);
+                        $self->data->update_rrdupdated_at($data->{id}) if defined($data->{timestamp});
                     }
                     else {
+                        next if defined($data->{short_rrdupdated_at});
                         $self->rrd->update_short($data);
+                        $self->data->update_short_rrdupdated_at($data->{id}) if defined($data->{timestamp});
                     }
                 }
             }
@@ -111,11 +115,15 @@ sub run {
                     debugf( "[%s] update %s", $method, $row);
                     if ( $method eq 'update' ) {
                         my $data = $self->data->get_by_id_for_rrdupdate($row->{id});
+                        next if defined($data->{rrdupdated_at}); # guard not to rrdupdate twice for the same timestamp
                         $self->rrd->update($data);
+                        $self->data->update_graph_rrdupdated_at($row->{id}) if defined($data->{timestamp});
                     }
                     else {
                         my $data = $self->data->get_by_id_for_rrdupdate_short($row->{id});
+                        next if defined($data->{short_rrdupdated_at});
                         $self->rrd->update_short($data);
+                        $self->data->update_graph_short_rrdupdated_at($row->{id}) if defined($data->{timestamp});
                     }
                 }
             }

@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS graphs (
     created_at   INT UNSIGNED NOT NULL,
     updated_at   INT UNSIGNED NOT NULL,
     timestamp    INT UNSIGNED DEFAULT NULL,
+    rrdupdated_at INT UNSIGNED DEFAULT NULL,
+    short_rrdupdated_at INT UNSIGNED DEFAULT NULL,
     PRIMARY KEY (id),
     UNIQUE  (service_name, section_name, graph_name)
 )  ENGINE=InnoDB DEFAULT CHARSET=utf8
@@ -130,6 +132,14 @@ EOF
             if ( ! exists $graphs_columns{timestamp} ) {
                 infof("add new column 'timestamp'");
                 $dbh->do(q{ALTER TABLE graphs ADD timestamp INT UNSIGNED DEFAULT NULL});
+            }
+            if ( ! exists $graphs_columns{rrdupdated_at} ) {
+                infof("add new column 'rrdupdated_at'");
+                $dbh->do(q{ALTER TABLE graphs ADD rrdupdated_at INT UNSIGNED DEFAULT NULL});
+            }
+            if ( ! exists $graphs_columns{short_rrdupdated_at} ) {
+                infof("add new column 'short_rrdupdated_at'");
+                $dbh->do(q{ALTER TABLE graphs ADD short_rrdupdated_at INT UNSIGNED DEFAULT NULL});
             }
         }
 

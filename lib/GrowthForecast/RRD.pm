@@ -22,8 +22,10 @@ sub path_param {
     my $data = shift;
 
     my $dst = $data->{mode} eq 'derive' ? 'DERIVE' : 'GAUGE';
+    my $timestamp = $data->{timestamp} || time;
 
     my @param = (
+        '--start', $timestamp - 10, # -10 as rrdcreate's default does (now - 10s)
         '--step', '300',
         "DS:num:${dst}:600:U:U",
         'RRA:AVERAGE:0.5:1:1440',  #5分, 5日
@@ -64,8 +66,10 @@ sub path_short_param {
     my $data = shift;
 
     my $dst = $data->{mode} eq 'derive' ? 'DERIVE' : 'GAUGE';
+    my $timestamp = $data->{timestamp} || time;
 
     my @param = (
+        '--start', $timestamp - 10, # -10 as rrdcreate's default does (now - 10s)
         '--step', '60',
         "DS:num:${dst}:120:U:U",
         'RRA:AVERAGE:0.5:1:4800',  #1分, 3日(80時間)
@@ -100,16 +104,17 @@ sub update_param {
     my $data = shift;
 
     my @param;
+    my $timestamp = $data->{timestamp} || 'N';
     if ( $self->{disable_subtract} ) {
         @param = (
             '-t', 'num',
-            '--', join(':','N',$data->{number}),
+            '--', join(':',$timestamp,$data->{number}),
         );
     }
     else {
         @param = (
             '-t', 'num:sub',
-            '--', join(':','N',$data->{number},$data->{subtract}),
+            '--', join(':',$timestamp,$data->{number},$data->{subtract}),
         );
     }
     if ( $self->{rrdcached} ) {
@@ -139,16 +144,17 @@ sub update_short_param {
     my $data = shift;
 
     my @param;
+    my $timestamp = $data->{timestamp} || 'N';
     if ( $self->{disable_subtract} ) {
         @param = (
             '-t', 'num',
-            '--', join(':','N',$data->{number}),
+            '--', join(':',$timestamp,$data->{number}),
         );
     }
     else {
         @param = (
             '-t', 'num:sub',
-            '--', join(':','N',$data->{number},$data->{subtract_short}),
+            '--', join(':',$timestamp,$data->{number},$data->{subtract_short}),
         );
     }
     if ( $self->{rrdcached} ) {

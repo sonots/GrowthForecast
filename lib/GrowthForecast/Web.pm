@@ -870,8 +870,8 @@ get '/api/:service_name/:section_name/:graph_name' => [qw/get_graph/] => sub {
     $c->render_json($c->stash->{graph});
 };
 
-post '/api/:service_name/:section_name/:graph_name' => sub {
-    my ( $self, $c )  = @_;
+sub api_update {
+    my ( $self, $c ) = @_;
     my $result = $c->req->validator([
         'number' => {
             rule => [
@@ -916,7 +916,7 @@ post '/api/:service_name/:section_name/:graph_name' => sub {
             messages => $result->messages
         });
         $res->status(400);
-        return $res;
+        return (undef, $res);
     }
 
     my $row;
@@ -940,8 +940,44 @@ post '/api/:service_name/:section_name/:graph_name' => sub {
         $self->data->update_graph_description($row->{id}, $descriptions[-1]);
     }
 
+    return $row;
+}
+
+post '/api/:service_name/:section_name/:graph_name' => sub {
+    my ( $self, $c )  = @_;
+    my ( $row, $res ) = $self->api_update($c);
+    return $res if $res;
     $c->render_json({ error => 0, data => $row });
 };
+
+post '/api/rrdupdate/:service_name/:section_name/:graph_name' => sub {
+    my ( $self, $c )  = @_;
+    my ( $row, $res ) = $self->api_update($c);
+    return $res if $res;
+    # immediate rrdupdate
+    $self->api_rrdupdate($row);
+    $c->render_json({ error => 0, data => $row });
+};
+
+sub api_rrdupdate {
+    my ( $self, $row )  = @_;
+
+    if ( $self->disable_subtract ) {
+        $self->rrd->update($row);
+        if ( $self->short ) {
+            $self->rrd->update_short($row);
+        }
+    }
+    else {
+        # need to get subtract
+        my $data = $self->data->get_by_id_for_rrdupdate($row->{id});
+        $self->rrd->update($data);
+        if ( $self->short ) {
+            my $data = $self->data->get_by_id_for_rrdupdate_short($row->{id});
+            $self->rrd->update_short($data);
+        }
+    }
+}
 
 # from internal hashref (inflated) expression to JSON friendly expression
 sub graph4json {

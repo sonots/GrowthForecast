@@ -26,16 +26,18 @@ sub path_param {
 
     my @param = (
         '--start', $timestamp - 10, # -10 as rrdcreate's default does (now - 10s)
-        '--step', '300',
+        '--step', '60',
         "DS:num:${dst}:600:U:U",
-        'RRA:AVERAGE:0.5:1:1440',  #5分, 5日
-        'RRA:AVERAGE:0.5:6:1008', #30分, 21日
-        'RRA:AVERAGE:0.5:24:1344', #2時間, 112日 
-        'RRA:AVERAGE:0.5:288:2500', #24時間, 500日
-        'RRA:MAX:0.5:1:1440',  #5分, 5日
-        'RRA:MAX:0.5:6:1008', #30分, 21日
-        'RRA:MAX:0.5:24:1344', #2時間, 112日 
-        'RRA:MAX:0.5:288:2500', #24時間, 500日
+        "RRA:MAX:0.5:1:4800",         #1分, 3日(80時間)
+        "RRA:MAX:0.5:5:1440",         #5分, 5日
+        "RRA:MAX:0.5:30:1008",        #30分, 21日
+        "RRA:MAX:0.5:120:1344",       #2時間, 112日
+        "RRA:MAX:0.5:1440:500",       #24時間, 500日
+        "RRA:AVERAGE:0.5:1:4800",     #1分, 3日(80時間)
+        "RRA:AVERAGE:0.5:5:1440",     #5分, 5日
+        "RRA:AVERAGE:0.5:30:1008",    #30分, 21日
+        "RRA:AVERAGE:0.5:120:1344",   #2時間, 112日
+        "RRA:AVERAGE:0.5:1440:500",   #24時間, 500日
     );
     unless ( $self->{disable_subtract} ) {
         # --disable-subtract does not create DS:sub which results in half disksize and half rrdupdate time

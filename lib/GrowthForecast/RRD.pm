@@ -28,10 +28,10 @@ sub path_param {
         '--start', $timestamp - 10, # -10 as rrdcreate's default does (now - 10s)
         '--step', '300',
         "DS:num:${dst}:600:U:U",
-        'RRA:AVERAGE:0.5:1:1440',  #5分, 5日
-        'RRA:AVERAGE:0.5:6:1008', #30分, 21日
-        'RRA:AVERAGE:0.5:24:1344', #2時間, 112日 
-        'RRA:AVERAGE:0.5:288:2500', #24時間, 500日
+#        'RRA:AVERAGE:0.5:1:1440',  #5分, 5日
+#        'RRA:AVERAGE:0.5:6:1008', #30分, 21日
+#        'RRA:AVERAGE:0.5:24:1344', #2時間, 112日 
+#        'RRA:AVERAGE:0.5:288:2500', #24時間, 500日
         'RRA:MAX:0.5:1:1440',  #5分, 5日
         'RRA:MAX:0.5:6:1008', #30分, 21日
         'RRA:MAX:0.5:24:1344', #2時間, 112日 
@@ -72,7 +72,7 @@ sub path_short_param {
         '--start', $timestamp - 10, # -10 as rrdcreate's default does (now - 10s)
         '--step', '60',
         "DS:num:${dst}:120:U:U",
-        'RRA:AVERAGE:0.5:1:4800',  #1分, 3日(80時間)
+#        'RRA:AVERAGE:0.5:1:4800',  #1分, 3日(80時間)
         'RRA:MAX:0.5:1:4800',  #1分, 3日(80時間)
     );
     unless ( $self->{disable_subtract} ) {
@@ -346,7 +346,7 @@ sub graph {
         my $unit = $data->{unit};
         $unit =~ s!%!%%!;
         push @opt, 
-            sprintf('DEF:%s%dt=%s:%s:AVERAGE', $gdata, $i, $file, $gdata),
+            sprintf('DEF:%s%dt=%s:%s:MAX', $gdata, $i, $file, $gdata),
             sprintf('CDEF:%s%d=%s%dt,%s,%s,LIMIT,%d,%s', $gdata, $i, $gdata, $i, $llimit, $ulimit, $data->{adjustval}, $data->{adjust}),
             sprintf('%s:%s%d%s:%s %s', $type, $gdata, $i, $data->{color}, $self->_escape($data->{graph_name}), $stack),
             sprintf('GPRINT:%s%d:LAST:Cur\: %%4.1lf%%s%s', $gdata, $i, $unit),

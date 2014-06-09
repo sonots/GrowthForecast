@@ -40,7 +40,7 @@ sub rrd {
 sub run {
     my $self = shift;
     my $method = shift || 'update';
-    my $interval = ( $method eq 'update' ) ? 300 : 60;
+    my $interval = ( $method eq 'update' ) ? 60 : 60;
 
     local $Log::Minimal::AUTODUMP = 1;
 

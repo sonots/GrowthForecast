@@ -233,13 +233,13 @@ sub calc_period {
         }
     }
     elsif ( $span eq 'h' || $span eq 'sh' ) {
-        $period_title = 'Hour (5min avg)';
+        $period_title = 'Hour (1min avg)';
         $period_title = 'Hour (1min avg)' if $span eq 'sh';
         $period = -1 * 60 * 60 * 2;
         $xgrid = 'MINUTE:10:MINUTE:20:MINUTE:10:0:%M';
     }
     elsif ( $span eq 'n' || $span eq 'sn' ) {
-        $period_title = 'Half Day (5min avg)';
+        $period_title = 'Half Day (1min avg)';
         $period_title = 'Half Day (1min avg)' if $span eq 'sn';
         $period = -1 * 60 * 60 * 14;
         $xgrid = 'MINUTE:60:MINUTE:120:MINUTE:120:0:%H %M';
@@ -260,25 +260,25 @@ sub calc_period {
         $xgrid = 'WEEK:1:MONTH:1:MONTH:1:2592000:%b'
     }
     elsif ( $span eq '3d' || $span eq 's3d') {
-        $period_title = '3 Days (5min avg)';
+        $period_title = '3 Days (1min avg)';
         $period_title = '3 Days (1min avg)' if $span eq 's3d';
         $period = -1 * 60 * 60 * 24 * 3;
         $xgrid = 'HOUR:6:DAY:1:HOUR:6:0:%H';
     }
     elsif ( $span eq '8h' || $span eq 's8h' ) {
-        $period_title = '8 Hours (5min avg)';
+        $period_title = '8 Hours (1min avg)';
         $period_title = '8 Hours (1min avg)' if $span eq 's8h'; 
         $period = -1 * 8 * 60 * 60;
         $xgrid = 'MINUTE:30:HOUR:1:HOUR:1:0:%H:%M';
     }
     elsif ( $span eq '4h' || $span eq 's4h') {
-        $period_title = '4 Hours (5min avg)';
+        $period_title = '4 Hours (1min avg)';
         $period_title = '4 Hours (1min avg)' if $span eq 's4h'; 
         $period = -1 * 4 * 60 * 60;
         $xgrid = 'MINUTE:30:HOUR:1:MINUTE:30:0:%H:%M';
     }
     else {
-        $period_title = 'Day (5min avg)';
+        $period_title = 'Day (1min avg)';
         $period_title = 'Day (1min avg)' if $span eq 'sd';
         $period = -1 * 60 * 60 * 33; # 33 hours
         $xgrid = 'HOUR:1:HOUR:2:HOUR:2:0:%H';
